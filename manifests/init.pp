@@ -85,6 +85,9 @@
 # @param sources
 #   Creates new `apt::source` resources. Valid options: a hash to be passed to the create_resources function linked above.
 #
+# @param auths
+#   Creates new `apt::auth` resources. Valid options: a hash to be passed to the create_resources function linked above.
+#
 # @param keys
 #   Creates new `apt::key` resources. Valid options: a hash to be passed to the create_resources function linked above.
 #
@@ -139,6 +142,9 @@
 # @param apt_conf_d
 #   The path to the file `apt.conf.d`
 #
+# @param auth_conf_d
+#   The path to the file `auth_conf.d`
+#
 # @param source_key_defaults
 #   The fault `source_key` settings
 #
@@ -158,6 +164,7 @@ class apt (
   Hash $purge                                     = $apt::params::purge,
   Apt::Proxy $proxy                               = $apt::params::proxy,
   Hash $sources                                   = $apt::params::sources,
+  Hash $auths                                     = $apt::params::auths,
   Hash $keys                                      = $apt::params::keys,
   Hash $ppas                                      = $apt::params::ppas,
   Hash $pins                                      = $apt::params::pins,
@@ -172,6 +179,7 @@ class apt (
   String $preferences                             = $apt::params::preferences,
   String $preferences_d                           = $apt::params::preferences_d,
   String $apt_conf_d                              = $apt::params::apt_conf_d,
+  String $auth_conf_d                             = $apt::params::auth_conf_d,
   Hash $config_files                              = $apt::params::config_files,
   Boolean $sources_list_force                     = $apt::params::sources_list_force,
 
@@ -340,12 +348,26 @@ class apt (
     notify  => Class['apt::update'],
   }
 
+  file { 'auth.conf.d':
+    ensure  => directory,
+    path    => $apt::auth_conf_d,
+    owner   => root,
+    group   => root,
+    purge   => $_purge['auth.conf.d'],
+    recurse => $_purge['auth.conf.d'],
+    notify  => Class['apt::update'],
+  }
+
   if $confs {
     create_resources('apt::conf', $confs)
   }
   # manage sources if present
   if $sources {
     create_resources('apt::source', $sources)
+  }
+  # manage auths if present
+  if $auths {
+    create_resources('apt::auth', $auths)
   }
   # manage keys if present
   if $keys {
