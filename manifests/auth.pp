@@ -26,7 +26,6 @@ define apt::auth (
   String $login    = undef,
   String $password = undef,
 ) {
-
   $content = epp('apt/auth_conf.d.epp',
     machine  => $machine,
     login    => $login,
@@ -41,5 +40,4 @@ define apt::auth (
     content => Sensitive($content),
     notify  => Class['apt::update'],
   }
-
 }
