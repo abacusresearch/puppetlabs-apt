@@ -2,7 +2,19 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
-## [v9.0.1](https://github.com/puppetlabs/puppetlabs-apt/tree/v9.0.1) (2022-12-20)
+## [v9.0.2](https://github.com/puppetlabs/puppetlabs-apt/tree/v9.0.2) (2023-03-14)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-apt/compare/v9.0.1...v9.0.2)
+
+### Fixed
+
+- Adopt new parameter defaults in template [\#1090](https://github.com/puppetlabs/puppetlabs-apt/pull/1090) ([tuxmea](https://github.com/tuxmea))
+- \(CONT-493\) PPA validation adjustment [\#1085](https://github.com/puppetlabs/puppetlabs-apt/pull/1085) ([LukasAud](https://github.com/LukasAud))
+- fix typo in source.pp [\#1082](https://github.com/puppetlabs/puppetlabs-apt/pull/1082) ([bastelfreak](https://github.com/bastelfreak))
+- fix: remove `apt::` prefix from fact variables [\#1081](https://github.com/puppetlabs/puppetlabs-apt/pull/1081) ([johanfleury](https://github.com/johanfleury))
+- Updated mark as title can contain dot \(fixes \#1074\) [\#1075](https://github.com/puppetlabs/puppetlabs-apt/pull/1075) ([xepa](https://github.com/xepa))
+
+## [v9.0.1](https://github.com/puppetlabs/puppetlabs-apt/tree/v9.0.1) (2022-12-21)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-apt/compare/v9.0.0...v9.0.1)
 
