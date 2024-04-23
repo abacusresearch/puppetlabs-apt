@@ -54,35 +54,35 @@ describe 'apt' do
         name: 'Debian',
         release: {
           major: '9',
-          full: '9.0',
+          full: '9.0'
         },
         distro: {
           codename: 'stretch',
-          id: 'Debian',
-        },
-      },
+          id: 'Debian'
+        }
+      }
     }
   end
 
   context 'with defaults' do
     it {
-      is_expected.to contain_file('sources.list').that_notifies('Class[Apt::Update]').only_with(sources_list)
+      expect(subject).to contain_file('sources.list').that_notifies('Class[Apt::Update]').only_with(sources_list)
     }
 
     it {
-      is_expected.to contain_file('sources.list.d').that_notifies('Class[Apt::Update]').only_with(sources_list_d)
+      expect(subject).to contain_file('sources.list.d').that_notifies('Class[Apt::Update]').only_with(sources_list_d)
     }
 
     it {
-      is_expected.to contain_file('preferences').that_notifies('Class[Apt::Update]').only_with(preferences)
+      expect(subject).to contain_file('preferences').that_notifies('Class[Apt::Update]').only_with(preferences)
     }
 
     it {
-      is_expected.to contain_file('preferences.d').that_notifies('Class[Apt::Update]').only_with(preferences_d)
+      expect(subject).to contain_file('preferences.d').that_notifies('Class[Apt::Update]').only_with(preferences_d)
     }
 
     it {
-      is_expected.to contain_file('apt.conf.d').that_notifies('Class[Apt::Update]').only_with(apt_conf_d)
+      expect(subject).to contain_file('apt.conf.d').that_notifies('Class[Apt::Update]').only_with(apt_conf_d)
     }
 
     it {
@@ -92,14 +92,14 @@ describe 'apt' do
     it { is_expected.to contain_file('/etc/apt/auth.conf').with_ensure('absent') }
 
     it 'lays down /etc/apt/apt.conf.d/15update-stamp' do
-      is_expected.to contain_file('/etc/apt/apt.conf.d/15update-stamp').with(group: 'root',
-                                                                             owner: 'root').with_content(
-                                                                               %r{APT::Update::Post-Invoke-Success {"touch /var/lib/apt/periodic/update-success-stamp 2>/dev/null || true";};},
-                                                                             )
+      expect(subject).to contain_file('/etc/apt/apt.conf.d/15update-stamp').with(group: 'root',
+                                                                                 owner: 'root').with_content(
+                                                                                   %r{APT::Update::Post-Invoke-Success {"touch /var/lib/apt/periodic/update-success-stamp 2>/dev/null || true";};},
+                                                                                 )
     end
 
     it {
-      is_expected.to contain_exec('apt_update').with(refreshonly: 'true')
+      expect(subject).to contain_exec('apt_update').with(refreshonly: 'true')
     }
 
     it { is_expected.not_to contain_apt__setting('conf-proxy') }
@@ -110,7 +110,7 @@ describe 'apt' do
       let(:params) { { proxy: { 'host' => 'localhost' } } }
 
       it {
-        is_expected.to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
+        expect(subject).to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
           %r{Acquire::http::proxy "http://localhost:8080/";},
         ).without_content(
           %r{Acquire::https::proxy },
@@ -122,7 +122,7 @@ describe 'apt' do
       let(:params) { { proxy: { 'host' => 'localhost', 'perhost' => [{ 'scope' => 'proxyscope', 'host' => 'proxyhost' }] } } }
 
       it {
-        is_expected.to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
+        expect(subject).to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
           %r{Acquire::http::proxy::proxyscope "http://proxyhost:8080/";},
         )
       }
@@ -132,7 +132,7 @@ describe 'apt' do
       let(:params) { { proxy: { 'host' => 'localhost', 'perhost' => [{ 'scope' => 'proxyscope', 'host' => 'proxyhost', 'port' => 8081 }] } } }
 
       it {
-        is_expected.to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
+        expect(subject).to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
           %r{Acquire::http::proxy::proxyscope "http://proxyhost:8081/";},
         )
       }
@@ -142,7 +142,7 @@ describe 'apt' do
       let(:params) { { proxy: { 'host' => 'localhost', 'perhost' => [{ 'scope' => 'proxyscope', 'host' => 'proxyhost', 'https' => true }] } } }
 
       it {
-        is_expected.to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
+        expect(subject).to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
           %r{Acquire::https::proxy::proxyscope "https://proxyhost:8080/";},
         )
       }
@@ -152,7 +152,7 @@ describe 'apt' do
       let(:params) { { proxy: { 'host' => 'localhost', 'perhost' => [{ 'scope' => 'proxyscope', 'direct' => true }] } } }
 
       it {
-        is_expected.to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
+        expect(subject).to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
           %r{Acquire::http::proxy::proxyscope "DIRECT";},
         )
       }
@@ -162,7 +162,7 @@ describe 'apt' do
       let(:params) { { proxy: { 'host' => 'localhost', 'perhost' => [{ 'scope' => 'proxyscope', 'https' => true, 'direct' => true }] } } }
 
       it {
-        is_expected.to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
+        expect(subject).to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
           %r{Acquire::https::proxy::proxyscope "DIRECT";},
         )
       }
@@ -172,7 +172,7 @@ describe 'apt' do
       let(:params) { { proxy: { 'host' => 'localhost', 'perhost' => [{ 'scope' => 'proxyscope', 'host' => 'proxyhost' }, { 'scope' => 'proxyscope2', 'host' => 'proxyhost2' }] } } }
 
       it {
-        is_expected.to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
+        expect(subject).to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
           %r{Acquire::http::proxy::proxyscope "http://proxyhost:8080/";},
         ).with_content(
           %r{Acquire::http::proxy::proxyscope2 "http://proxyhost2:8080/";},
@@ -184,7 +184,7 @@ describe 'apt' do
       let(:params) { { proxy: { 'host' => 'localhost', 'port' => 8180 } } }
 
       it {
-        is_expected.to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
+        expect(subject).to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
           %r{Acquire::http::proxy "http://localhost:8180/";},
         ).without_content(
           %r{Acquire::https::proxy },
@@ -196,7 +196,7 @@ describe 'apt' do
       let(:params) { { proxy: { 'host' => 'localhost', 'https' => true } } }
 
       it {
-        is_expected.to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
+        expect(subject).to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
           %r{Acquire::http::proxy "http://localhost:8080/";},
         ).with_content(
           %r{Acquire::https::proxy "https://localhost:8080/";},
@@ -208,7 +208,7 @@ describe 'apt' do
       let(:params) { { proxy: { 'host' => 'localhost', 'direct' => true } } }
 
       it {
-        is_expected.to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
+        expect(subject).to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
           %r{Acquire::http::proxy "http://localhost:8080/";},
         ).with_content(
           %r{Acquire::https::proxy "DIRECT";},
@@ -220,14 +220,15 @@ describe 'apt' do
       let(:params) { { proxy: { 'host' => 'localhost', 'https' => true, 'direct' => true } } }
 
       it {
-        is_expected.to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
+        expect(subject).to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
           %r{Acquire::http::proxy "http://localhost:8080/";},
         ).with_content(
           %r{Acquire::https::proxy "https://localhost:8080/";},
         )
       }
+
       it {
-        is_expected.to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
+        expect(subject).to contain_apt__setting('conf-proxy').with(priority: '01').with_content(
           %r{Acquire::http::proxy "http://localhost:8080/";},
         ).without_content(
           %r{Acquire::https::proxy "DIRECT";},
@@ -239,88 +240,89 @@ describe 'apt' do
       let(:params) { { proxy: { 'ensure' => 'absent' } } }
 
       it {
-        is_expected.to contain_apt__setting('conf-proxy').with(ensure: 'absent',
-                                                               priority: '01')
+        expect(subject).to contain_apt__setting('conf-proxy').with(ensure: 'absent',
+                                                                   priority: '01')
       }
     end
   end
-  context 'with lots of non-defaults' do
+
+  context 'with lots of non-defaults - one' do
     let :params do
       {
         update: { 'frequency' => 'always', 'timeout' => 1, 'tries' => 3 },
         purge: { 'sources.list' => false, 'sources.list.d' => false,
                  'preferences' => false, 'preferences.d' => false,
-                 'apt.conf.d' => false },
+                 'apt.conf.d' => false }
       }
     end
 
     it {
-      is_expected.to contain_file('sources.list').with(content: nil)
+      expect(subject).to contain_file('sources.list').with(content: nil)
     }
 
     it {
-      is_expected.to contain_file('sources.list.d').with(purge: false,
+      expect(subject).to contain_file('sources.list.d').with(purge: false,
+                                                             recurse: false)
+    }
+
+    it {
+      expect(subject).to contain_file('preferences').with(ensure: 'file')
+    }
+
+    it {
+      expect(subject).to contain_file('preferences.d').with(purge: false,
+                                                            recurse: false)
+    }
+
+    it {
+      expect(subject).to contain_file('apt.conf.d').with(purge: false,
                                                          recurse: false)
     }
 
     it {
-      is_expected.to contain_file('preferences').with(ensure: 'file')
-    }
-
-    it {
-      is_expected.to contain_file('preferences.d').with(purge: false,
-                                                        recurse: false)
-    }
-
-    it {
-      is_expected.to contain_file('apt.conf.d').with(purge: false,
-                                                     recurse: false)
-    }
-
-    it {
-      is_expected.to contain_exec('apt_update').with(refreshonly: false,
-                                                     timeout: 1,
-                                                     tries: 3)
+      expect(subject).to contain_exec('apt_update').with(refreshonly: false,
+                                                         timeout: 1,
+                                                         tries: 3)
     }
   end
 
-  context 'with lots of non-defaults' do
+  context 'with lots of non-defaults - two' do
     let :params do
       {
         update: { 'frequency' => 'always', 'timeout' => 1, 'tries' => 3 },
         purge: { 'sources.list' => true, 'sources.list.d' => true,
                  'preferences' => true, 'preferences.d' => true,
-                 'apt.conf.d' => true },
+                 'apt.conf.d' => true }
       }
     end
 
     it {
-      is_expected.to contain_file('sources.list').with(content: "# Repos managed by puppet.\n")
+      expect(subject).to contain_file('sources.list').with(content: "# Repos managed by puppet.\n")
     }
 
     it {
-      is_expected.to contain_file('sources.list.d').with(purge: true,
+      expect(subject).to contain_file('sources.list.d').with(purge: true,
+                                                             recurse: true)
+    }
+
+    it {
+      expect(subject).to contain_file('preferences').with(ensure: 'absent')
+    }
+
+    it {
+      expect(subject).to contain_file('preferences.d').with(purge: true,
+                                                            recurse: true)
+    }
+
+    it {
+      expect(subject).to contain_file('apt.conf.d').with(purge: true,
                                                          recurse: true)
     }
 
     it {
-      is_expected.to contain_file('preferences').with(ensure: 'absent')
-    }
-
-    it {
-      is_expected.to contain_file('preferences.d').with(purge: true,
-                                                        recurse: true)
-    }
-
-    it {
-      is_expected.to contain_file('apt.conf.d').with(purge: true,
-                                                     recurse: true)
-    }
-
-    it {
-      is_expected.to contain_exec('apt_update').with(refreshonly: false,
-                                                     timeout: 1,
-                                                     tries: 3)
+      expect(subject).to contain_exec('apt_update').with(refreshonly: false,
+                                                         timeout: 1,
+                                                         tries: 3)
     }
   end
 
@@ -329,12 +331,12 @@ describe 'apt' do
       {
         update: { 'frequency' => 'always', 'timeout' => 1, 'tries' => 3 },
         purge: { 'sources.list' => true },
-        sources_list_force: false,
+        sources_list_force: false
       }
     end
 
     it {
-      is_expected.to contain_file('sources.list').with(content: "# Repos managed by puppet.\n")
+      expect(subject).to contain_file('sources.list').with(content: "# Repos managed by puppet.\n")
     }
   end
 
@@ -343,12 +345,12 @@ describe 'apt' do
       {
         update: { 'frequency' => 'always', 'timeout' => 1, 'tries' => 3 },
         purge: { 'sources.list' => true },
-        sources_list_force: true,
+        sources_list_force: true
       }
     end
 
     it {
-      is_expected.to contain_file('sources.list').with(ensure: 'absent')
+      expect(subject).to contain_file('sources.list').with(ensure: 'absent')
     }
   end
 
@@ -360,13 +362,13 @@ describe 'apt' do
           name: 'Ubuntu',
           release: {
             major: '18',
-            full: '18.04',
+            full: '18.04'
           },
           distro: {
             codename: 'bionic',
-            id: 'Ubuntu',
-          },
-        },
+            id: 'Ubuntu'
+          }
+        }
       },
       'Debian 9.0' => {
         os: {
@@ -374,13 +376,13 @@ describe 'apt' do
           name: 'Debian',
           release: {
             major: '9',
-            full: '9.0',
+            full: '9.0'
           },
           distro: {
             codename: 'stretch',
-            id: 'Debian',
-          },
-        },
+            id: 'Debian'
+          }
+        }
       },
       'Debian 10.0' => {
         os: {
@@ -388,18 +390,18 @@ describe 'apt' do
           name: 'Debian',
           release: {
             major: '10',
-            full: '10.0',
+            full: '10.0'
           },
           distro: {
             codename: 'buster',
-            id: 'Debian',
-          },
-        },
-      },
+            id: 'Debian'
+          }
+        }
+      }
     }
 
     facts_hash.each do |os, facts|
-      context "on #{os}" do
+      context "when on #{os}" do
         let(:facts) do
           facts
         end
@@ -409,14 +411,14 @@ describe 'apt' do
               {
                 machine: 'deb.example.net',
                 login: 'foologin',
-                password: 'secret',
+                password: 'secret'
               },
               {
                 machine: 'apt.example.com',
                 login: 'aptlogin',
-                password: 'supersecret',
+                password: 'supersecret'
               },
-            ],
+            ]
           }
         end
 
@@ -425,18 +427,19 @@ describe 'apt' do
             super().merge(manage_auth_conf: true)
           end
 
-          auth_conf_content = "// This file is managed by Puppet. DO NOT EDIT.
-machine deb.example.net login foologin password secret
-machine apt.example.com login aptlogin password supersecret
-"
+          auth_conf_content = <<~CONTENT
+            // This file is managed by Puppet. DO NOT EDIT.
+            machine deb.example.net login foologin password secret
+            machine apt.example.com login aptlogin password supersecret
+          CONTENT
 
           it {
-            is_expected.to contain_file('/etc/apt/auth.conf').with(ensure: 'present',
-                                                                   owner: '_apt',
-                                                                   group: 'root',
-                                                                   mode: '0600',
-                                                                   notify: 'Class[Apt::Update]',
-                                                                   content: sensitive(auth_conf_content))
+            expect(subject).to contain_file('/etc/apt/auth.conf').with(ensure: 'present',
+                                                                       owner: '_apt',
+                                                                       group: 'root',
+                                                                       mode: '0600',
+                                                                       notify: 'Class[Apt::Update]',
+                                                                       content: sensitive(auth_conf_content))
           }
         end
 
@@ -446,7 +449,7 @@ machine apt.example.com login aptlogin password supersecret
           end
 
           it {
-            is_expected.not_to contain_file('/etc/apt/auth.conf')
+            expect(subject).not_to contain_file('/etc/apt/auth.conf')
           }
         end
       end
@@ -458,14 +461,14 @@ machine apt.example.com login aptlogin password supersecret
               {
                 machinn: 'deb.example.net',
                 username: 'foologin',
-                password: 'secret',
+                password: 'secret'
               },
               {
                 machine: 'apt.example.com',
                 login: 'aptlogin',
-                password: 'supersecret',
+                password: 'supersecret'
               },
-            ],
+            ]
           }
         end
 
@@ -482,42 +485,42 @@ machine apt.example.com login aptlogin password supersecret
           name: 'Ubuntu',
           release: {
             major: '18',
-            full: '18.04',
+            full: '18.04'
           },
           distro: {
             codename: 'bionic',
-            id: 'Ubuntu',
-          },
-        },
+            id: 'Ubuntu'
+          }
+        }
       }
     end
     let(:params) do
       { sources: {
         'debian_unstable' => {
-          'location'          => 'http://debian.mirror.iweb.ca/debian/',
-          'release'           => 'unstable',
-          'repos'             => 'main contrib non-free',
-          'key'               => { 'id' => '150C8614919D8446E01E83AF9AA38DCD55BE302B', 'server' => 'subkeys.pgp.net' },
-          'pin'               => '-10',
-          'include'           => { 'src' => true },
+          'location' => 'http://debian.mirror.iweb.ca/debian/',
+          'release' => 'unstable',
+          'repos' => 'main contrib non-free',
+          'key' => { 'id' => '150C8614919D8446E01E83AF9AA38DCD55BE302B', 'server' => 'subkeys.pgp.net' },
+          'pin' => '-10',
+          'include' => { 'src' => true }
         },
         'puppetlabs' => {
           'location' => 'http://apt.puppetlabs.com',
-          'repos'      => 'main',
-          'key'        => { 'id' => '6F6B15509CF8E59E6E469F327F438280EF8D349F', 'server' => 'pgp.mit.edu' },
-        },
+          'repos' => 'main',
+          'key' => { 'id' => '6F6B15509CF8E59E6E469F327F438280EF8D349F', 'server' => 'pgp.mit.edu' }
+        }
       } }
     end
 
     it {
-      is_expected.to contain_apt__setting('list-debian_unstable').with(ensure: 'present')
+      expect(subject).to contain_apt__setting('list-debian_unstable').with(ensure: 'present')
     }
 
     it { is_expected.to contain_file('/etc/apt/sources.list.d/debian_unstable.list').with_content(%r{^deb http://debian.mirror.iweb.ca/debian/ unstable main contrib non-free$}) }
     it { is_expected.to contain_file('/etc/apt/sources.list.d/debian_unstable.list').with_content(%r{^deb-src http://debian.mirror.iweb.ca/debian/ unstable main contrib non-free$}) }
 
     it {
-      is_expected.to contain_apt__setting('list-puppetlabs').with(ensure: 'present')
+      expect(subject).to contain_apt__setting('list-puppetlabs').with(ensure: 'present')
     }
 
     it { is_expected.to contain_file('/etc/apt/sources.list.d/puppetlabs.list').with_content(%r{^deb http://apt.puppetlabs.com bionic main$}) }
@@ -531,32 +534,32 @@ machine apt.example.com login aptlogin password supersecret
           name: 'Ubuntu',
           release: {
             major: '18',
-            full: '18.04',
+            full: '18.04'
           },
           distro: {
             codename: 'bionic',
-            id: 'Ubuntu',
-          },
-        },
+            id: 'Ubuntu'
+          }
+        }
       }
     end
     let(:params) do
       { confs: {
         'foo' => {
-          'content' => 'foo',
+          'content' => 'foo'
         },
         'bar' => {
-          'content' => 'bar',
-        },
+          'content' => 'bar'
+        }
       } }
     end
 
     it {
-      is_expected.to contain_apt__conf('foo').with(content: 'foo')
+      expect(subject).to contain_apt__conf('foo').with(content: 'foo')
     }
 
     it {
-      is_expected.to contain_apt__conf('bar').with(content: 'bar')
+      expect(subject).to contain_apt__conf('bar').with(content: 'bar')
     }
   end
 
@@ -568,32 +571,32 @@ machine apt.example.com login aptlogin password supersecret
           name: 'Ubuntu',
           release: {
             major: '18',
-            full: '18.04',
+            full: '18.04'
           },
           distro: {
             codename: 'bionic',
-            id: 'Ubuntu',
-          },
-        },
+            id: 'Ubuntu'
+          }
+        }
       }
     end
     let(:params) do
       { keys: {
         '55BE302B' => {
-          'server' => 'subkeys.pgp.net',
+          'server' => 'subkeys.pgp.net'
         },
         'EF8D349F' => {
-          'server' => 'pgp.mit.edu',
-        },
+          'server' => 'pgp.mit.edu'
+        }
       } }
     end
 
     it {
-      is_expected.to contain_apt__key('55BE302B').with(server: 'subkeys.pgp.net')
+      expect(subject).to contain_apt__key('55BE302B').with(server: 'subkeys.pgp.net')
     }
 
     it {
-      is_expected.to contain_apt__key('EF8D349F').with(server: 'pgp.mit.edu')
+      expect(subject).to contain_apt__key('EF8D349F').with(server: 'pgp.mit.edu')
     }
   end
 
@@ -605,19 +608,19 @@ machine apt.example.com login aptlogin password supersecret
           name: 'Ubuntu',
           release: {
             major: '18',
-            full: '18.04',
+            full: '18.04'
           },
           distro: {
             codename: 'bionic',
-            id: 'Ubuntu',
-          },
-        },
+            id: 'Ubuntu'
+          }
+        }
       }
     end
     let(:params) do
       { ppas: {
         'ppa:drizzle-developers/ppa' => {},
-        'ppa:nginx/stable' => {},
+        'ppa:nginx/stable' => {}
       } }
     end
 
@@ -633,19 +636,19 @@ machine apt.example.com login aptlogin password supersecret
           name: 'Ubuntu',
           release: {
             major: '18',
-            full: '18.04',
+            full: '18.04'
           },
           distro: {
             codename: 'bionic',
-            id: 'Ubuntu',
-          },
-        },
+            id: 'Ubuntu'
+          }
+        }
       }
     end
     let(:params) do
       { settings: {
         'conf-banana' => { 'content' => 'banana' },
-        'pref-banana' => { 'content' => 'banana' },
+        'pref-banana' => { 'content' => 'banana' }
       } }
     end
 
@@ -661,19 +664,19 @@ machine apt.example.com login aptlogin password supersecret
           name: 'Ubuntu',
           release: {
             major: '18',
-            full: '18.04',
+            full: '18.04'
           },
           distro: {
             codename: 'bionic',
-            id: 'Ubuntu',
-          },
-        },
+            id: 'Ubuntu'
+          }
+        }
       }
     end
     let(:params) do
       { pins: {
         'stable' => { 'priority' => 600, 'order' => 50 },
-        'testing' =>  { 'priority' => 700, 'order' => 100 },
+        'testing' => { 'priority' => 700, 'order' => 100 }
       } }
     end
 
@@ -686,7 +689,7 @@ machine apt.example.com login aptlogin password supersecret
       let(:params) { { purge: { 'sources.list' => 'banana' } } }
 
       it do
-        is_expected.to raise_error(Puppet::Error)
+        expect(subject).to raise_error(Puppet::Error)
       end
     end
 
@@ -694,7 +697,7 @@ machine apt.example.com login aptlogin password supersecret
       let(:params) { { purge: { 'sources.list.d' => 'banana' } } }
 
       it do
-        is_expected.to raise_error(Puppet::Error)
+        expect(subject).to raise_error(Puppet::Error)
       end
     end
 
@@ -702,7 +705,7 @@ machine apt.example.com login aptlogin password supersecret
       let(:params) { { purge: { 'preferences' => 'banana' } } }
 
       it do
-        is_expected.to raise_error(Puppet::Error)
+        expect(subject).to raise_error(Puppet::Error)
       end
     end
 
@@ -710,7 +713,7 @@ machine apt.example.com login aptlogin password supersecret
       let(:params) { { purge: { 'preferences.d' => 'banana' } } }
 
       it do
-        is_expected.to raise_error(Puppet::Error)
+        expect(subject).to raise_error(Puppet::Error)
       end
     end
 
@@ -718,7 +721,7 @@ machine apt.example.com login aptlogin password supersecret
       let(:params) { { purge: { 'apt.conf.d' => 'banana' } } }
 
       it do
-        is_expected.to raise_error(Puppet::Error)
+        expect(subject).to raise_error(Puppet::Error)
       end
     end
   end

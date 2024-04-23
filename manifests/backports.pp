@@ -1,15 +1,7 @@
 # @summary Manages backports.
 #
-# @example Set up a backport source for Linux Mint qiana
-#   class { 'apt::backports':
-#     location => 'http://us.archive.ubuntu.com/ubuntu',
-#     release  => 'trusty-backports',
-#     repos    => 'main universe multiverse restricted',
-#     key      => {
-#       id     => '630239CC130E1A7FD81A27B140976EAF437D05B5',
-#       server => 'keyserver.ubuntu.com',
-#     },
-#   }
+# @example Set up a backport source for Ubuntu
+#   include apt::backports
 #
 # @param location
 #   Specifies an Apt repository containing the backports to manage. Valid options: a string containing a URL. Default value for Debian and
@@ -34,12 +26,12 @@
 #
 # @param key
 #   Specifies a key to authenticate the backports. Valid options: a string to be passed to the id parameter of the apt::key defined type, or a
-#   hash of parameter => value pairs to be passed to apt::key's id, server, content, source, and/or options parameters. Default value
-#   for Debian and Ubuntu varies:
+#   hash of parameter => value pairs to be passed to apt::key's id, server, content, source, and/or options parameters.
 #
-#   - Debian: 'A1BD8E9D78F7FE5C3E65D8AF8B48AD6246925553'
-#
-#   - Ubuntu: '630239CC130E1A7FD81A27B140976EAF437D05B5'
+# @param keyring
+#   Absolute path to a file containing the PGP keyring used to sign this
+#   repository. Value is passed to the apt::source and used to set signed-by on
+#   the source entry.
 #
 # @param pin
 #   Specifies a pin priority for the backports. Valid options: a number or string to be passed to the `id` parameter of the `apt::pin` defined
@@ -53,6 +45,7 @@ class apt::backports (
   Optional[String] $release                     = undef,
   Optional[String] $repos                       = undef,
   Optional[Variant[String, Hash]] $key          = undef,
+  Stdlib::AbsolutePath $keyring                 = "/usr/share/keyrings/${facts['os']['name'].downcase}-archive-keyring.gpg",
   Variant[Integer, String, Hash] $pin           = 200,
   Variant[Hash] $include                        = {},
 ) {
@@ -61,23 +54,25 @@ class apt::backports (
   if $location {
     $_location = $location
   }
+
   if $release {
     $_release = $release
   }
+
   if $repos {
     $_repos = $repos
   }
-  if $key {
-    $_key = $key
-  }
+
   if (!($facts['os']['name'] == 'Debian' or $facts['os']['name'] == 'Ubuntu')) {
-    unless $location and $release and $repos and $key {
-      fail('If not on Debian or Ubuntu, you must explicitly pass location, release, repos, and key')
+    unless $location and $release and $repos {
+      fail('If not on Debian or Ubuntu, you must explicitly pass location, release, and repos')
     }
   }
+
   unless $location {
     $_location = $apt::backports['location']
   }
+
   unless $release {
     if fact('os.distro.codename') {
       $_release = "${fact('os.distro.codename')}-backports"
@@ -85,11 +80,15 @@ class apt::backports (
       fail('os.distro.codename fact not available: release parameter required')
     }
   }
+
   unless $repos {
     $_repos = $apt::backports['repos']
   }
-  unless $key {
-    $_key =  $apt::backports['key']
+
+  $_keyring = if $key {
+    undef
+  } else {
+    $keyring
   }
 
   if $pin =~ Hash {
@@ -110,7 +109,8 @@ class apt::backports (
     release  => $_release,
     repos    => $_repos,
     include  => $include,
-    key      => $_key,
+    key      => $key,
+    keyring  => $_keyring,
     pin      => $_pin,
   }
 }

@@ -41,8 +41,10 @@
 #   `apt-get update` runs regardless of this value.
 #   Valid options:
 #     'always' (at every Puppet run); 
-#      daily' (if the value of `apt_update_last_success` is less than current epoch time minus 86400);
+#     'hourly' (if the value of `apt_update_last_success` is less than current epoch time minus 3600);
+#     'daily'  (if the value of `apt_update_last_success` is less than current epoch time minus 86400);
 #     'weekly' (if the value of `apt_update_last_success` is less than current epoch time minus 604800);
+#     Integer  (if the value of `apt_update_last_success` is less than current epoch time minus provided Integer value);
 #     'reluctantly' (only if the exec resource `apt_update` is notified).
 #   Default: 'reluctantly'.
 #
@@ -90,6 +92,9 @@
 #
 # @param keys
 #   Creates new `apt::key` resources. Valid options: a hash to be passed to the create_resources function linked above.
+#
+# @param keyrings
+#   Hash of `apt::keyring` resources.
 #
 # @param ppas
 #   Creates new `apt::ppa` resources. Valid options: a hash to be passed to the create_resources function linked above.
@@ -166,6 +171,7 @@ class apt (
   Hash $sources                                   = $apt::params::sources,
   Hash $auths                                     = $apt::params::auths,
   Hash $keys                                      = $apt::params::keys,
+  Hash $keyrings                                  = {},
   Hash $ppas                                      = $apt::params::ppas,
   Hash $pins                                      = $apt::params::pins,
   Hash $settings                                  = $apt::params::settings,
@@ -197,7 +203,7 @@ class apt (
 
   if $update['frequency'] {
     assert_type(
-      Enum['always','daily','weekly','reluctantly'],
+      Variant[Enum['always','hourly','daily','weekly','reluctantly'],Integer[60]],
       $update['frequency'],
     )
   }
@@ -208,7 +214,7 @@ class apt (
     assert_type(Integer, $update['tries'])
   }
 
-  $_update = merge($apt::update_defaults, $update)
+  $_update = $apt::update_defaults + $update
   include apt::update
 
   if $purge['sources.list'] {
@@ -230,11 +236,11 @@ class apt (
     assert_type(Boolean, $purge['apt.conf.d'])
   }
 
-  $_purge = merge($apt::purge_defaults, $purge)
+  $_purge = $apt::purge_defaults + $purge
 
   if $proxy['perhost'] {
     $_perhost = $proxy['perhost'].map |$item| {
-      $_item = merge($apt::proxy_defaults, $item)
+      $_item = $apt::proxy_defaults + $item
       $_scheme = $_item['https'] ? {
         true    => 'https',
         default => 'http',
@@ -247,17 +253,13 @@ class apt (
         true    => 'DIRECT',
         default => "${_scheme}://${_item['host']}${_port}/",
       }
-      merge($item, {
-          'scheme' => $_scheme,
-          'target' => $_target,
-        }
-      )
+      $item + { 'scheme' => $_scheme, 'target' => $_target, }
     }
   } else {
     $_perhost = {}
   }
 
-  $_proxy = merge($apt::proxy_defaults, $proxy, { 'perhost' => $_perhost })
+  $_proxy = $apt::proxy_defaults + $proxy + { 'perhost' => $_perhost }
 
   $confheadertmp = epp('apt/_conf_header.epp')
   $proxytmp = epp('apt/proxy.epp', { 'proxies' => $_proxy })
@@ -373,6 +375,12 @@ class apt (
   if $keys {
     create_resources('apt::key', $keys)
   }
+  # manage keyrings if present
+  $keyrings.each |$key, $data| {
+    apt::keyring { $key:
+      * => $data,
+    }
+  }
   # manage ppas if present
   if $ppas {
     create_resources('apt::ppa', $ppas)
@@ -388,14 +396,14 @@ class apt (
       default => 'present',
     }
 
-    $auth_conf_tmp = epp('apt/auth_conf.epp')
+    $auth_conf_tmp = stdlib::deferrable_epp('apt/auth_conf.epp', { 'auth_conf_entries' => $auth_conf_entries })
 
     file { '/etc/apt/auth.conf':
       ensure  => $auth_conf_ensure,
       owner   => $auth_conf_owner,
       group   => 'root',
       mode    => '0600',
-      content => Sensitive("${confheadertmp}${auth_conf_tmp}"),
+      content => Sensitive($auth_conf_tmp),
       notify  => Class['apt::update'],
     }
   }
@@ -407,14 +415,10 @@ class apt (
 
   case $facts['os']['name'] {
     'Debian': {
-      if versioncmp($facts['os']['release']['major'], '9') >= 0 {
-        ensure_packages(['gnupg'])
-      }
+      stdlib::ensure_packages(['gnupg'])
     }
     'Ubuntu': {
-      if versioncmp($facts['os']['release']['full'], '17.04') >= 0 {
-        ensure_packages(['gnupg'])
-      }
+      stdlib::ensure_packages(['gnupg'])
     }
     default: {
       # Nothing in here

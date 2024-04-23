@@ -14,37 +14,37 @@ describe 'apt::mark', type: :define do
         name: 'Debian',
         release: {
           major: '9',
-          full: '9.0',
+          full: '9.0'
         },
         distro: {
           codename: 'stretch',
-          id: 'Debian',
-        },
-      },
+          id: 'Debian'
+        }
+      }
     }
   end
 
   context 'with correct seting' do
     let :params do
       {
-        'setting' => 'manual',
+        'setting' => 'manual'
       }
     end
 
     it {
-      is_expected.to contain_exec('apt-mark manual mysource')
+      expect(subject).to contain_exec('apt-mark manual mysource')
     }
   end
 
   describe 'with wrong setting' do
     let :params do
       {
-        'setting' => 'foobar',
+        'setting' => 'foobar'
       }
     end
 
     it do
-      is_expected.to raise_error(Puppet::PreformattedError, %r{expects a match for Enum\['auto', 'hold', 'manual', 'unhold'\], got 'foobar'})
+      expect(subject).to raise_error(Puppet::PreformattedError, %r{expects a match for Enum\['auto', 'hold', 'manual', 'unhold'\], got 'foobar'})
     end
   end
 
@@ -65,12 +65,12 @@ describe 'apt::mark', type: :define do
 
       let :params do
         {
-          'setting' => 'manual',
+          'setting' => 'manual'
         }
       end
 
       it do
-        is_expected.to contain_exec("apt-mark manual #{title}")
+        expect(subject).to contain_exec("apt-mark manual #{title}")
       end
     end
   end
@@ -94,12 +94,12 @@ describe 'apt::mark', type: :define do
 
       let :params do
         {
-          'setting' => 'manual',
+          'setting' => 'manual'
         }
       end
 
       it do
-        is_expected.to raise_error(Puppet::PreformattedError, %r{Invalid package name: #{title}})
+        expect(subject).to raise_error(Puppet::PreformattedError, %r{Invalid package name: #{title}})
       end
     end
   end
