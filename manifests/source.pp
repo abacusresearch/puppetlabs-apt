@@ -28,7 +28,7 @@
 #   Supplies a comment for adding to the Apt source file.
 #
 # @param ensure
-#   Specifies whether the Apt source file should exist. Valid options: 'present' and 'absent'.
+#   Specifies whether the Apt source file should exist.
 #
 # @param release
 #   Specifies a distribution of the Apt repository.
@@ -40,10 +40,10 @@
 #   Configures include options. Valid options: a hash of available keys.
 #
 # @option include [Boolean] :deb
-#   Specifies whether to request the distribution's compiled binaries. Default true.
+#   Specifies whether to request the distribution's compiled binaries.
 #
 # @option include [Boolean] :src
-#   Specifies whether to request the distribution's uncompiled source code. Default false.
+#   Specifies whether to request the distribution's uncompiled source code.
 #
 # @param key
 #   Creates an `apt::keyring` in `/etc/apt/keyrings` (or anywhere on disk given `filename`) Valid options:
@@ -77,7 +77,7 @@
 #   Specifies whether to trigger an `apt-get update` run.
 #
 # @param check_valid_until
-#   Specifies whether to check if the package release date is valid. Defaults to `True`.
+#   Specifies whether to check if the package release date is valid.
 #
 define apt::source (
   Optional[String] $location                    = undef,
@@ -209,10 +209,12 @@ define apt::source (
     $_architecture = undef
   }
 
-  $sourcelist = epp('apt/source.list.epp', {
+  $sourcelist = epp('apt/source.list.epp',
+    {
       'comment'          => $comment,
       'includes'         => $includes,
-      'options'          => delete_undef_values({
+      'options'          => delete_undef_values(
+        {
           'arch'              => $_architecture,
           'trusted'           => $allow_unsigned ? { true => 'yes', false => undef },
           'allow-insecure'    => $allow_insecure ? { true => 'yes', false => undef },
@@ -222,7 +224,7 @@ define apt::source (
       ),
       'location'         => $_location,
       'components'       => $_components,
-    }
+    },
   )
 
   apt::setting { "list-${name}":
@@ -246,6 +248,9 @@ define apt::source (
     } else {
       fail('Received invalid value for pin parameter')
     }
-    create_resources('apt::pin', { "${name}" => $_pin })
+
+    apt::pin { $name:
+      * => $_pin,
+    }
   }
 }

@@ -10,7 +10,7 @@
     * [Add GPG keys](#add-gpg-keys)
     * [Prioritize backports](#prioritize-backports)
     * [Update the list of packages](#update-the-list-of-packages)
-    * [Pin a specific release](#pin-a-specific-release) 
+    * [Pin a specific release](#pin-a-specific-release)
     * [Add a Personal Package Archive repository](#add-a-personal-package-archive-repository)
     * [Configure Apt from Hiera](#configure-apt-from-hiera)
     * [Replace the default sources.list file](#replace-the-default-sourceslist-file)

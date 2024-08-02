@@ -13,7 +13,6 @@
 
 #### Private Classes
 
-* `apt::params`: Provides defaults for the Apt module parameters.
 * `apt::update`: Updates the list of available packages using apt-get update.
 
 ### Defined types
@@ -99,7 +98,7 @@ Data type: `String`
 
 Specifies the provider that should be used by apt::update.
 
-Default value: `$apt::params::provider`
+Default value: `'/usr/bin/apt-get'`
 
 ##### <a name="-apt--keyserver"></a>`keyserver`
 
@@ -108,7 +107,7 @@ Data type: `String`
 Specifies a keyserver to provide the GPG key. Valid options: a string containing a domain name or a full URL (http://, https://, or
 hkp://).
 
-Default value: `$apt::params::keyserver`
+Default value: `'keyserver.ubuntu.com'`
 
 ##### <a name="-apt--key_options"></a>`key_options`
 
@@ -116,7 +115,7 @@ Data type: `Optional[String]`
 
 Specifies the default options for apt::key resources.
 
-Default value: `$apt::params::key_options`
+Default value: `undef`
 
 ##### <a name="-apt--ppa_options"></a>`ppa_options`
 
@@ -124,7 +123,7 @@ Data type: `Optional[Array[String]]`
 
 Supplies options to be passed to the `add-apt-repository` command.
 
-Default value: `$apt::params::ppa_options`
+Default value: `undef`
 
 ##### <a name="-apt--ppa_package"></a>`ppa_package`
 
@@ -132,7 +131,7 @@ Data type: `Optional[String]`
 
 Names the package that provides the `apt-add-repository` command.
 
-Default value: `$apt::params::ppa_package`
+Default value: `undef`
 
 ##### <a name="-apt--backports"></a>`backports`
 
@@ -146,15 +145,15 @@ Options:
 * **:repos** `String`: See apt::backports for documentation.
 * **:key** `String`: See apt::backports for documentation.
 
-Default value: `$apt::params::backports`
+Default value: `undef`
 
 ##### <a name="-apt--confs"></a>`confs`
 
 Data type: `Hash`
 
-Creates new `apt::conf` resources. Valid options: a hash to be passed to the create_resources function linked above.
+Hash of `apt::conf` resources.
 
-Default value: `$apt::params::confs`
+Default value: `{}`
 
 ##### <a name="-apt--update"></a>`update`
 
@@ -178,7 +177,7 @@ Default: 'reluctantly'.
 * **:timeout** `Integer`: Specifies how long to wait for the update to complete before canceling it. Valid options: an integer, in seconds. Default: undef.
 * **:tries** `Integer`: Specifies how many times to retry the update after receiving a DNS or HTTP error. Default: undef.
 
-Default value: `$apt::params::update`
+Default value: `{}`
 
 ##### <a name="-apt--update_defaults"></a>`update_defaults`
 
@@ -186,7 +185,16 @@ Data type: `Hash`
 
 The default update settings that are combined and merged with the passed `update` value
 
-Default value: `$apt::params::update_defaults`
+Default value:
+
+```puppet
+{
+    'frequency' => 'reluctantly',
+    'loglevel'  => undef,
+    'timeout'   => undef,
+    'tries'     => undef,
+  }
+```
 
 ##### <a name="-apt--purge"></a>`purge`
 
@@ -201,7 +209,7 @@ Options:
 * **:preferences** `Boolean`: Specifies whether to purge any unmanaged entries from preferences. Default false.
 * **:preferences.d.** `Boolean`: Specifies whether to purge any unmanaged entries from preferences.d. Default false.
 
-Default value: `$apt::params::purge`
+Default value: `{}`
 
 ##### <a name="-apt--purge_defaults"></a>`purge_defaults`
 
@@ -209,7 +217,17 @@ Data type: `Hash`
 
 The default purge settings that are combined and merged with the passed `purge` value
 
-Default value: `$apt::params::purge_defaults`
+Default value:
+
+```puppet
+{
+    'sources.list'   => false,
+    'sources.list.d' => false,
+    'preferences'    => false,
+    'preferences.d'  => false,
+    'apt.conf.d'     => false,
+  }
+```
 
 ##### <a name="-apt--proxy"></a>`proxy`
 
@@ -217,7 +235,7 @@ Data type: `Apt::Proxy`
 
 Configures Apt to connect to a proxy server. Valid options: a hash matching the locally defined type apt::proxy.
 
-Default value: `$apt::params::proxy`
+Default value: `{}`
 
 ##### <a name="-apt--proxy_defaults"></a>`proxy_defaults`
 
@@ -225,23 +243,34 @@ Data type: `Hash`
 
 The default proxy settings that are combined and merged with the passed `proxy` value
 
-Default value: `$apt::params::proxy_defaults`
+Default value:
+
+```puppet
+{
+    'ensure'     => undef,
+    'host'       => undef,
+    'port'       => 8080,
+    'https'      => false,
+    'https_acng' => false,
+    'direct'     => false,
+  }
+```
 
 ##### <a name="-apt--sources"></a>`sources`
 
 Data type: `Hash`
 
-Creates new `apt::source` resources. Valid options: a hash to be passed to the create_resources function linked above.
+Hash of `apt::source` resources.
 
-Default value: `$apt::params::sources`
+Default value: `{}`
 
 ##### <a name="-apt--keys"></a>`keys`
 
 Data type: `Hash`
 
-Creates new `apt::key` resources. Valid options: a hash to be passed to the create_resources function linked above.
+Hash of `apt::key` resources.
 
-Default value: `$apt::params::keys`
+Default value: `{}`
 
 ##### <a name="-apt--keyrings"></a>`keyrings`
 
@@ -255,25 +284,25 @@ Default value: `{}`
 
 Data type: `Hash`
 
-Creates new `apt::ppa` resources. Valid options: a hash to be passed to the create_resources function linked above.
+Hash of `apt::ppa` resources.
 
-Default value: `$apt::params::ppas`
+Default value: `{}`
 
 ##### <a name="-apt--pins"></a>`pins`
 
 Data type: `Hash`
 
-Creates new `apt::pin` resources. Valid options: a hash to be passed to the create_resources function linked above.
+Hash of `apt::pin` resources.
 
-Default value: `$apt::params::pins`
+Default value: `{}`
 
 ##### <a name="-apt--settings"></a>`settings`
 
 Data type: `Hash`
 
-Creates new `apt::setting` resources. Valid options: a hash to be passed to the create_resources function linked above.
+Hash of `apt::setting` resources.
 
-Default value: `$apt::params::settings`
+Default value: `{}`
 
 ##### <a name="-apt--manage_auth_conf"></a>`manage_auth_conf`
 
@@ -282,7 +311,7 @@ Data type: `Boolean`
 Specifies whether to manage the /etc/apt/auth.conf file. When true, the file will be overwritten with the entries specified in
 the auth_conf_entries parameter. When false, the file will be ignored (note that this does not set the file to absent.
 
-Default value: `$apt::params::manage_auth_conf`
+Default value: `true`
 
 ##### <a name="-apt--auth_conf_entries"></a>`auth_conf_entries`
 
@@ -293,15 +322,15 @@ format (similar to what curl uses) and contains the login configuration for APT 
 https://manpages.debian.org/testing/apt/apt_auth.conf.5.en.html for details. If specified each hash must contain the keys machine, login and
 password and no others. Specifying manage_auth_conf and not specifying this parameter will set /etc/apt/auth.conf to absent.
 
-Default value: `$apt::params::auth_conf_entries`
+Default value: `[]`
 
 ##### <a name="-apt--auth_conf_owner"></a>`auth_conf_owner`
 
 Data type: `String`
 
-The owner of the file /etc/apt/auth.conf. Default: '_apt' or 'root' on old releases.
+The owner of the file /etc/apt/auth.conf.
 
-Default value: `$apt::params::auth_conf_owner`
+Default value: `'_apt'`
 
 ##### <a name="-apt--root"></a>`root`
 
@@ -309,7 +338,7 @@ Data type: `String`
 
 Specifies root directory of Apt executable.
 
-Default value: `$apt::params::root`
+Default value: `'/etc/apt'`
 
 ##### <a name="-apt--sources_list"></a>`sources_list`
 
@@ -317,7 +346,7 @@ Data type: `String`
 
 Specifies the path of the sources_list file to use.
 
-Default value: `$apt::params::sources_list`
+Default value: `"${root}/sources.list"`
 
 ##### <a name="-apt--sources_list_d"></a>`sources_list_d`
 
@@ -325,7 +354,7 @@ Data type: `String`
 
 Specifies the path of the sources_list.d file to use.
 
-Default value: `$apt::params::sources_list_d`
+Default value: `"${root}/sources.list.d"`
 
 ##### <a name="-apt--conf_d"></a>`conf_d`
 
@@ -333,7 +362,7 @@ Data type: `String`
 
 Specifies the path of the conf.d file to use.
 
-Default value: `$apt::params::conf_d`
+Default value: `"${root}/apt.conf.d"`
 
 ##### <a name="-apt--preferences"></a>`preferences`
 
@@ -341,7 +370,7 @@ Data type: `String`
 
 Specifies the path of the preferences file to use.
 
-Default value: `$apt::params::preferences`
+Default value: `"${root}/preferences"`
 
 ##### <a name="-apt--preferences_d"></a>`preferences_d`
 
@@ -349,7 +378,7 @@ Data type: `String`
 
 Specifies the path of the preferences.d file to use.
 
-Default value: `$apt::params::preferences_d`
+Default value: `"${root}/preferences.d"`
 
 ##### <a name="-apt--config_files"></a>`config_files`
 
@@ -357,23 +386,47 @@ Data type: `Hash`
 
 A hash made up of the various configuration files used by Apt.
 
-Default value: `$apt::params::config_files`
+Default value:
+
+```puppet
+{
+    'conf'   => {
+      'path' => $conf_d,
+      'ext'  => '',
+    },
+    'pref'   => {
+      'path' => $preferences_d,
+      'ext'  => '.pref',
+    },
+    'list'   => {
+      'path' => $sources_list_d,
+      'ext'  => '.list',
+    },
+  }
+```
 
 ##### <a name="-apt--sources_list_force"></a>`sources_list_force`
 
 Data type: `Boolean`
 
-Specifies whether to perform force purge or delete. Default false.
+Specifies whether to perform force purge or delete.
 
-Default value: `$apt::params::sources_list_force`
+Default value: `false`
 
 ##### <a name="-apt--include_defaults"></a>`include_defaults`
 
 Data type: `Hash`
 
+The package types to include by default.
 
+Default value:
 
-Default value: `$apt::params::include_defaults`
+```puppet
+{
+    'deb' => true,
+    'src' => false,
+  }
+```
 
 ##### <a name="-apt--apt_conf_d"></a>`apt_conf_d`
 
@@ -381,7 +434,7 @@ Data type: `String`
 
 The path to the file `apt.conf.d`
 
-Default value: `$apt::params::apt_conf_d`
+Default value: `"${root}/apt.conf.d"`
 
 ##### <a name="-apt--source_key_defaults"></a>`source_key_defaults`
 
@@ -1074,7 +1127,7 @@ Default value: `$name`
 
 Data type: `String`
 
-Specifies whether the Apt source file should exist. Valid options: 'present' and 'absent'.
+Specifies whether the Apt source file should exist.
 
 Default value: `present`
 
@@ -1102,8 +1155,8 @@ Configures include options. Valid options: a hash of available keys.
 
 Options:
 
-* **:deb** `Boolean`: Specifies whether to request the distribution's compiled binaries. Default true.
-* **:src** `Boolean`: Specifies whether to request the distribution's uncompiled source code. Default false.
+* **:deb** `Boolean`: Specifies whether to request the distribution's compiled binaries.
+* **:src** `Boolean`: Specifies whether to request the distribution's uncompiled source code.
 
 Default value: `{}`
 
@@ -1177,7 +1230,7 @@ Default value: `true`
 
 Data type: `Boolean`
 
-Specifies whether to check if the package release date is valid. Defaults to `True`.
+Specifies whether to check if the package release date is valid.
 
 Default value: `true`
 
