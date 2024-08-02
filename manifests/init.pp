@@ -405,6 +405,12 @@ class apt (
     }
   }
 
+  $sources.each |$key, $value| {
+    apt::source { $key:
+      * => $value,
+    }
+  }
+
   $auths.each |$key, $value| {
     apt::auth { $key:
       * => $value,
