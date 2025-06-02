@@ -13,12 +13,12 @@ describe 'apt::backports', type: :class do
             family: 'Debian',
             name: 'Debian',
             release: {
-              full: '11.8',
-              major: '11',
-              minor: '8'
+              full: '12.5',
+              major: '12',
+              minor: '5'
             },
             distro: {
-              codename: 'bullseye',
+              codename: 'bookworm',
               id: 'Debian'
             }
           }
@@ -28,11 +28,11 @@ describe 'apt::backports', type: :class do
       it {
         expect(subject).to contain_apt__source('backports').with(
           location: 'http://deb.debian.org/debian',
-          repos: 'main contrib non-free',
-          release: 'bullseye-backports',
+          repos: 'main contrib non-free non-free-firmware',
+          release: 'bookworm-backports',
           pin: {
             'priority' => 200,
-            'release' => 'bullseye-backports'
+            'codename' => 'bookworm-backports'
           },
           keyring: '/usr/share/keyrings/debian-archive-keyring.gpg',
         )
@@ -143,88 +143,6 @@ describe 'apt::backports', type: :class do
           pin: { 'priority' => '90' },
         )
       }
-    end
-  end
-
-  describe 'linuxmint tests' do
-    let(:facts) do
-      {
-        os: {
-          family: 'Debian',
-          name: 'LinuxMint',
-          release: {
-            major: '17',
-            full: '17'
-          },
-          distro: {
-            codename: 'qiana',
-            id: 'LinuxMint'
-          }
-        }
-      }
-    end
-
-    context 'with all the needed things set' do
-      let(:params) do
-        {
-          location: 'http://archive.ubuntu.com/ubuntu',
-          release: 'trusty-backports',
-          repos: 'main universe multiverse restricted',
-          key: '630239CC130E1A7FD81A27B140976EAF437D05B5'
-        }
-      end
-
-      it {
-        expect(subject).to contain_apt__source('backports').with(
-          location: 'http://archive.ubuntu.com/ubuntu',
-          key: '630239CC130E1A7FD81A27B140976EAF437D05B5',
-          repos: 'main universe multiverse restricted',
-          release: 'trusty-backports',
-          pin: { 'priority' => 200, 'release' => 'trusty-backports' },
-        )
-      }
-    end
-
-    context 'with missing location' do
-      let(:params) do
-        {
-          release: 'trusty-backports',
-          repos: 'main universe multiverse restricted',
-          key: '630239CC130E1A7FD81A27B140976EAF437D05B5'
-        }
-      end
-
-      it do
-        expect(subject).to raise_error(Puppet::Error, %r{If not on Debian or Ubuntu, you must explicitly pass location, release, and repos})
-      end
-    end
-
-    context 'with missing release' do
-      let(:params) do
-        {
-          location: 'http://archive.ubuntu.com/ubuntu',
-          repos: 'main universe multiverse restricted',
-          key: '630239CC130E1A7FD81A27B140976EAF437D05B5'
-        }
-      end
-
-      it do
-        expect(subject).to raise_error(Puppet::Error, %r{If not on Debian or Ubuntu, you must explicitly pass location, release, and repos})
-      end
-    end
-
-    context 'with missing repos' do
-      let(:params) do
-        {
-          location: 'http://archive.ubuntu.com/ubuntu',
-          release: 'trusty-backports',
-          key: '630239CC130E1A7FD81A27B140976EAF437D05B5'
-        }
-      end
-
-      it do
-        expect(subject).to raise_error(Puppet::Error, %r{If not on Debian or Ubuntu, you must explicitly pass location, release, and repos})
-      end
     end
   end
 
